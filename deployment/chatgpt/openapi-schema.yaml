@@ -1,0 +1,91 @@
+openapi: 3.1.1
+info:
+  title: Personal RAG Knowledge Base
+  description: >
+    Search a personal knowledge base covering Change Management, Workshop Facilitation,
+    Leadership, Negotiation, and Group Psychology. Returns relevant document chunks —
+    use them as context to synthesize your answer.
+  version: 3.1.1
+servers:
+  - url: https://rag.elicitiq.com
+    description: Production server
+
+paths:
+  /search:
+    post:
+      operationId: searchKnowledgeBase
+      summary: Search the knowledge base
+      description: >
+        Returns the most relevant document chunks from an academic library via
+        vector similarity search. Chunks contain text from books and papers,
+        often with inline citations (e.g. "Kotter, 1996"). Always quote directly
+        from chunk text and cite the source field as the reference.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - query
+              properties:
+                query:
+                  type: string
+                  description: The question to search for
+                  example: "What are the key principles of change management?"
+                top_k:
+                  type: integer
+                  description: Number of chunks to return
+                  default: 8
+                  minimum: 1
+                  maximum: 30
+      responses:
+        '200':
+          description: Relevant document chunks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  query:
+                    type: string
+                    description: The original query
+                  chunks:
+                    type: array
+                    description: Matching document chunks sorted by relevance
+                    items:
+                      type: object
+                      properties:
+                        text:
+                          type: string
+                          description: Content of the chunk, often containing inline academic citations
+                        score:
+                          type: number
+                          description: Similarity score (lower is more similar)
+                        source:
+                          type: string
+                          description: Source document — book or paper title (e.g. 'Armenakis & Harris, 2009')
+                        domain:
+                          type: string
+                          description: Primary knowledge domain
+                        metadata:
+                          type: object
+                          description: All available metadata for this chunk
+                  total_chunks_in_store:
+                    type: integer
+                    description: Total number of chunks in the vector store
+        '401':
+          description: Unauthorized - invalid API key
+        '503':
+          description: Service unavailable - vector store not loaded
+
+components:
+  schemas: {}
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: API Key
+      description: Enter your RAG API key

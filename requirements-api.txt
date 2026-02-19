@@ -1,0 +1,18 @@
+# API server dependencies only (slim version for Docker)
+
+# LangChain (FAISS loader only)
+langchain-community>=0.0.10
+langchain-huggingface>=0.0.1
+python-dotenv>=1.0.0
+
+# Vector store and embeddings
+faiss-cpu>=1.7.4
+# Use CPU-only torch builds (installed via Dockerfile extra index)
+torch==2.3.1+cpu
+sentence-transformers==2.7.0
+numpy>=1.24.0
+
+# API server
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.0.0

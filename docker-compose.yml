@@ -1,0 +1,30 @@
+services:
+  rag-api:
+    build: .
+    container_name: kindlgrab-rag-api
+    ports:
+      - "127.0.0.1:8000:8000"
+    env_file:
+      - .env
+    environment:
+      - PORT=8000
+      - HOST=0.0.0.0
+      - DOCKER_CONTAINER=1
+    volumes:
+      # Mount data from host instead of copying into image
+      - ./embeddings.faiss:/app/embeddings.faiss:ro
+      - ./output:/app/output:ro
+      - ./config:/app/config:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - rag-network
+
+networks:
+  rag-network:
+    driver: bridge

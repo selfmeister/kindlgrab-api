@@ -1,0 +1,24 @@
+[Unit]
+Description=KindlGrab RAG API Service
+After=network.target
+
+[Service]
+Type=simple
+User=YOUR_USERNAME
+WorkingDirectory=/path/to/kindlgrab
+Environment="PATH=/path/to/kindlgrab/venv/bin"
+EnvironmentFile=/path/to/kindlgrab/.env
+ExecStart=/path/to/kindlgrab/venv/bin/python -m uvicorn query.api_server:app --host 127.0.0.1 --port 8000
+Restart=always
+RestartSec=10
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Logging
+StandardOutput=append:/var/log/rag-api/output.log
+StandardError=append:/var/log/rag-api/error.log
+
+[Install]
+WantedBy=multi-user.target

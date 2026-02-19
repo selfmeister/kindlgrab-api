@@ -1,0 +1,18 @@
+.env
+venv/
+__pycache__/
+*.pyc
+.idea/
+.vscode/
+.DS_Store
+query_interface.log
+streamlit_debug.log
+
+# usually too large/sensitive for git:
+embeddings.faiss/
+output/
+input/
+screenshots/
+amazon_screenshots/
+backups/
+*.zip
