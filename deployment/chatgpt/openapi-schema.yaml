@@ -15,6 +15,7 @@ paths:
     post:
       operationId: searchKnowledgeBase
       summary: Search the knowledge base
+      x-openai-isConsequential: false
       description: >
         Returns the most relevant document chunks from an academic library via
         vector similarity search. Chunks contain text from books and papers,
@@ -38,9 +39,19 @@ paths:
                 top_k:
                   type: integer
                   description: Number of chunks to return
-                  default: 8
+                  default: 5
                   minimum: 1
                   maximum: 30
+                include_metadata:
+                  type: boolean
+                  description: Keep false for ChatGPT Actions to reduce payload size.
+                  default: false
+                max_chars_per_chunk:
+                  type: integer
+                  description: Maximum number of characters returned for each chunk.
+                  default: 1800
+                  minimum: 300
+                  maximum: 4000
       responses:
         '200':
           description: Relevant document chunks
@@ -70,6 +81,9 @@ paths:
                         domain:
                           type: string
                           description: Primary knowledge domain
+                        truncated:
+                          type: boolean
+                          description: Whether the returned chunk text was shortened for response size safety
                         metadata:
                           type: object
                           description: All available metadata for this chunk

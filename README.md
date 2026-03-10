@@ -85,7 +85,9 @@ curl -X POST https://rag.elicitiq.com/search \
   -H "Content-Type: application/json" \
   -d '{
     "query": "What are the key principles of change management?",
-    "top_k": 5
+    "top_k": 5,
+    "include_metadata": false,
+    "max_chars_per_chunk": 1800
   }'
 ```
 
@@ -99,13 +101,10 @@ curl -X POST https://rag.elicitiq.com/search \
       "score": 0.234,
       "source": "Armenakis & Harris, 2009",
       "domain": "Change Management",
-      "metadata": {
-        "source": "Armenakis & Harris, 2009",
-        "processed_at": "2024-01-15T10:30:00",
-        ...
-      }
+      "truncated": false
     }
-  ]
+  ],
+  "total_chunks_in_store": 21622
 }
 ```
 
@@ -135,6 +134,8 @@ Copy contents of `deployment/chatgpt/gpt-instructions.md` into the **Instruction
 Ask: "What are the key principles of change management?"
 
 ChatGPT should call `searchKnowledgeBase`, retrieve chunks, and synthesize an answer with direct quotes and citations.
+
+For follow-up turns, ChatGPT should rewrite references like "tell me more about that" into a standalone search query before calling the action again. The API itself is stateless; continuity comes from the GPT conversation, not server-side session storage.
 
 ## Deployment Notes
 

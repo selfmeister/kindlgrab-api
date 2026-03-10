@@ -6,6 +6,7 @@ ChatGPT (or any client) handles synthesis from the returned chunks.
 """
 
 import os
+import re
 import secrets
 from typing import Optional, List
 from fastapi import FastAPI, HTTPException, Depends, Security, status
@@ -22,6 +23,7 @@ except ModuleNotFoundError:
 from langchain_huggingface import HuggingFaceEmbeddings
 
 from config.domains import get_all_domains, get_domain_metadata
+from config.settings import EMBEDDING_MODEL
 
 # Load environment variables
 load_dotenv()
@@ -48,13 +50,25 @@ app.add_middleware(TrustedHostMiddleware, allowed_hosts=allowed_hosts)
 
 # Global vectorstore
 vectorstore: Optional[FAISS] = None
+DEFAULT_TOP_K = int(os.getenv("RAG_DEFAULT_TOP_K", "5"))
+MAX_CHARS_PER_CHUNK = int(os.getenv("RAG_MAX_CHARS_PER_CHUNK", "1800"))
 
 
 # ── Models ────────────────────────────────────────────────────────────────────
 
 class SearchRequest(BaseModel):
     query: str = Field(..., description="The question to search for", min_length=1)
-    top_k: int = Field(default=8, description="Number of chunks to return", ge=1, le=30)
+    top_k: int = Field(default=DEFAULT_TOP_K, description="Number of chunks to return", ge=1, le=30)
+    include_metadata: bool = Field(
+        default=False,
+        description="Include full chunk metadata in the response. Keep false for ChatGPT Actions to reduce payload size.",
+    )
+    max_chars_per_chunk: int = Field(
+        default=MAX_CHARS_PER_CHUNK,
+        description="Maximum number of characters returned for each chunk.",
+        ge=300,
+        le=4000,
+    )
 
 
 class Chunk(BaseModel):
@@ -62,6 +76,7 @@ class Chunk(BaseModel):
     score: float = Field(..., description="Similarity score (lower = more similar)")
     source: Optional[str] = Field(default=None, description="Source document (book or paper title, e.g. 'Armenakis & Harris, 2009')")
     domain: Optional[str] = Field(default=None, description="Primary knowledge domain")
+    truncated: bool = Field(default=False, description="Whether the returned chunk text was shortened for response size safety")
     metadata: Optional[dict] = Field(default=None, description="All available metadata for this chunk")
 
 
@@ -100,7 +115,7 @@ async def verify_api_key(credentials: HTTPAuthorizationCredentials = Security(se
 
 def load_vectorstore() -> FAISS:
     embeddings = HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-mpnet-base-v2",
+        model_name=EMBEDDING_MODEL,
         model_kwargs={"device": "cpu"}
     )
     vectorstore_dir = "embeddings.faiss"
@@ -133,6 +148,17 @@ def _extract_domain(metadata: dict) -> Optional[str]:
     if isinstance(domains, str):
         return domains
     return metadata.get("domain")
+
+
+def _truncate_text(text: str, max_chars: int) -> tuple[str, bool]:
+    compact = re.sub(r"\s+", " ", text).strip()
+    if len(compact) <= max_chars:
+        return compact, False
+
+    cutoff = compact.rfind(" ", 0, max_chars - 14)
+    if cutoff < max_chars // 2:
+        cutoff = max_chars - 14
+    return f"{compact[:cutoff].rstrip()} [truncated]", True
 
 
 # ── Startup ───────────────────────────────────────────────────────────────────
@@ -188,12 +214,14 @@ async def search(
         chunks = []
         for doc, score in results:
             meta = doc.metadata or {}
+            text, truncated = _truncate_text(doc.page_content, request.max_chars_per_chunk)
             chunks.append(Chunk(
-                text=doc.page_content,
+                text=text,
                 score=round(float(score), 4),
                 source=meta.get("source"),
                 domain=_extract_domain(meta),
-                metadata=meta,
+                truncated=truncated,
+                metadata=meta if request.include_metadata else None,
             ))
 
         return SearchResponse(
