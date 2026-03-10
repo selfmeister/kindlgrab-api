@@ -4,8 +4,8 @@ set -e
 # Sync embeddings from local kindlgrab repo to server
 # Run this after regenerating embeddings locally
 
-SERVER="root@46.225.58.246"
-REMOTE_DIR="~/kindlgrab-api"
+SERVER="deploy@46.225.58.246"
+REMOTE_DIR="/srv/apps/kindlgrab-rag"
 LOCAL_KINDLGRAB="/Users/me/PycharmProjects/kindlgrab"
 
 echo "📊 Syncing embeddings to server..."
@@ -16,6 +16,9 @@ if [ ! -d "${LOCAL_KINDLGRAB}/embeddings.faiss" ]; then
     echo "Run embedding generation first in the kindlgrab repo"
     exit 1
 fi
+
+# Ensure remote directories exist before rsync
+ssh ${SERVER} "mkdir -p ${REMOTE_DIR}/embeddings.faiss ${REMOTE_DIR}/output"
 
 # Sync embeddings
 echo "📤 Uploading FAISS index..."

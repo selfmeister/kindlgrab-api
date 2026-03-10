@@ -4,8 +4,8 @@ set -e
 # Deployment script for kindlgrab-api
 # Usage: ./deploy.sh
 
-SERVER="root@46.225.58.246"
-REMOTE_DIR="~/kindlgrab-api"
+SERVER="deploy@46.225.58.246"
+REMOTE_DIR="/srv/apps/kindlgrab-rag"
 
 echo "🚀 Deploying kindlgrab-api to server..."
 

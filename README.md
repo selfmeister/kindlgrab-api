@@ -53,15 +53,15 @@ python -m ingest.retrieval.embeddings
 
 Then **sync to server**:
 ```bash
-rsync -avz embeddings.faiss/ root@your-server:~/kindlgrab-api/embeddings.faiss/
-rsync -avz output/ root@your-server:~/kindlgrab-api/output/
+rsync -avz embeddings.faiss/ deploy@your-server:/srv/apps/kindlgrab-rag/embeddings.faiss/
+rsync -avz output/ deploy@your-server:/srv/apps/kindlgrab-rag/output/
 ```
 
 ### 3. Deploy
 
 **On server:**
 ```bash
-cd ~/kindlgrab-api
+cd /srv/apps/kindlgrab-rag
 docker-compose build --no-cache
 docker-compose up -d
 ```
@@ -170,11 +170,11 @@ When you regenerate embeddings locally:
 python -m ingest.retrieval.embeddings
 
 # Sync to server
-rsync -avz embeddings.faiss/ root@your-server:~/kindlgrab-api/embeddings.faiss/
-rsync -avz output/ root@your-server:~/kindlgrab-api/output/
+rsync -avz embeddings.faiss/ deploy@your-server:/srv/apps/kindlgrab-rag/embeddings.faiss/
+rsync -avz output/ deploy@your-server:/srv/apps/kindlgrab-rag/output/
 
 # Restart API (to reload vector store)
-ssh root@your-server "cd ~/kindlgrab-api && docker-compose restart"
+ssh deploy@your-server "cd /srv/apps/kindlgrab-rag && docker-compose restart"
 ```
 
 ## Dependencies

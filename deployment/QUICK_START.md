@@ -21,10 +21,10 @@ sudo apt install -y python3 python3-pip python3-venv git nginx
 # From your local machine
 cd /Users/me/PycharmProjects
 tar -czf kindlgrab.tar.gz kindlgrab/
-scp kindlgrab.tar.gz root@46.225.58.246:~/
+scp kindlgrab.tar.gz deploy@46.225.58.246:~/
 
 # On your server
-ssh root@46.225.58.246
+ssh deploy@46.225.58.246
 tar -xzf kindlgrab.tar.gz
 cd kindlgrab
 ```
