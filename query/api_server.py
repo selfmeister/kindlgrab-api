@@ -50,8 +50,8 @@ app.add_middleware(TrustedHostMiddleware, allowed_hosts=allowed_hosts)
 
 # Global vectorstore
 vectorstore: Optional[FAISS] = None
-DEFAULT_TOP_K = int(os.getenv("RAG_DEFAULT_TOP_K", "5"))
-MAX_CHARS_PER_CHUNK = int(os.getenv("RAG_MAX_CHARS_PER_CHUNK", "1800"))
+DEFAULT_TOP_K = int(os.getenv("RAG_DEFAULT_TOP_K", "6"))
+MAX_CHARS_PER_CHUNK = int(os.getenv("RAG_MAX_CHARS_PER_CHUNK", "2200"))
 
 
 # ── Models ────────────────────────────────────────────────────────────────────

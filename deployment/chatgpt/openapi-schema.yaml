@@ -39,7 +39,7 @@ paths:
                 top_k:
                   type: integer
                   description: Number of chunks to return
-                  default: 5
+                  default: 6
                   minimum: 1
                   maximum: 30
                 include_metadata:
@@ -49,7 +49,7 @@ paths:
                 max_chars_per_chunk:
                   type: integer
                   description: Maximum number of characters returned for each chunk.
-                  default: 1800
+                  default: 2200
                   minimum: 300
                   maximum: 4000
       responses:

@@ -85,9 +85,9 @@ curl -X POST https://rag.elicitiq.com/search \
   -H "Content-Type: application/json" \
   -d '{
     "query": "What are the key principles of change management?",
-    "top_k": 5,
+    "top_k": 6,
     "include_metadata": false,
-    "max_chars_per_chunk": 1800
+    "max_chars_per_chunk": 2200
   }'
 ```
 
